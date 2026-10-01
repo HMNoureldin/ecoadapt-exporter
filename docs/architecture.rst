@@ -128,8 +128,8 @@ values, optionally reverses words, optionally swaps bytes within each word,
 and always unpacks the normalized bytes as big-endian. This preserves the
 caller's register list. Format and size tables are independent of device access.
 
-Failure behavior and proof-of-concept boundaries
-------------------------------------------------
+Failure behavior
+----------------
 
 A failed connection raises ``ConnectionError``; an error Modbus response raises
 ``IOError``. Invalid register values or addressing raise ``ValueError``. Sending
@@ -142,10 +142,3 @@ The Modbus client is synchronous and can block the Twisted event loop. A sender
 close clears its protocol, but does not automatically stop polling or reconnect.
 Shutdown requests a WebSocket close; it does not wait for delivery acknowledgements,
 and cleanup exceptions are not isolated from later cleanup steps.
-
-The implementation does not provide TLS setup (it uses ``connectTCP``),
-authentication, buffering, persistence, reconnect/backoff, metrics and operational monitoring,
-or a deployment service. Future work includes nonblocking device reads, explicit
-failure policies, external customer mappings, payload source identity, and hardware
-validation. The existing separation allows alternate transports and senders to be
-introduced without embedding those concerns in register decoding.

@@ -491,26 +491,6 @@ production implementation should provide structured logging and useful
 health/error information such as connection state, failed reads,
 WebSocket failures, and reconnect attempts.
 
-### Security
-
-The development setup uses a local, unencrypted WebSocket connection. A
-production deployment would need an appropriate authenticated and
-encrypted communication mechanism, with suitable credential and
-certificate management.
-
-### Deployment
-
-The exporter would need to run as a managed service on the Sensorfact
-bridge, with automatic startup, restart handling, configuration
-management, log collection, software updates, and compatibility with the
-bridge runtime.
-
-### Scaling to many customers
-
-Individual bridge failures should not affect other devices. The exporter
-should be independently configurable and restartable, with enough
-monitoring to identify devices that are offline or repeatedly failing.
-
 ### Testing
 
 The current tests cover register decoding, device behavior, exporter
@@ -520,23 +500,6 @@ transport.
 A production implementation would benefit from additional tests for
 Modbus failures, invalid register data, WebSocket disconnects, reconnect
 behavior, malformed configuration, and long-running behavior.
-
-## Limitations of the proof of concept
-
-The following are intentionally outside the current scope:
-
--   persistent storage
--   cloud-side storage or analysis
--   production authentication
--   production TLS configuration
--   automatic reconnect/backoff
--   production monitoring
--   customer-specific external configuration
--   a production service manager
--   physical-device hardware testing
-
-The goal is to demonstrate the core communication path and provide a
-basis for estimating the work required for a production implementation.
 
 ## Documentation
 
@@ -582,7 +545,7 @@ The site uses the Read the Docs theme with expandable sidebar
 navigation, API references for all runtime modules, script and test guides,
 a file inventory, search, and source links. The architecture guide explains
 layer responsibilities, startup and shutdown, measurement flow, configuration,
-and current limitations, with an offline decoder flow diagram.
+and failure behavior, with an offline decoder flow diagram.
 
 Rebuild the documentation after editing docstrings or documentation. Add
 new modules to `docs/api.rst` using `automodule` directives as the

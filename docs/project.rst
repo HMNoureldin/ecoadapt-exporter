@@ -58,7 +58,7 @@ Configuration and documentation
    * - ``.gitignore``
      - Excludes virtual environments, Python caches, and generated documentation.
    * - ``README.md``
-     - Repository overview, setup commands, design rationale, and PoC limitations.
+     - Repository overview, setup commands, design rationale, and operating instructions.
    * - ``docs/conf.py``
      - Import paths, autodoc/viewcode extensions, theme settings, and custom CSS.
    * - ``docs/index.rst``
