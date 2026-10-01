@@ -1,5 +1,6 @@
 """Coordinate device reads and measurement delivery on a Twisted timer."""
 
+import logging
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -31,6 +32,7 @@ class Exporter:
     :param sender: Sender implementing connection, delivery, and cleanup methods.
     :param measurements: Requests processed in list order during every cycle.
     :param interval: Seconds between scheduled cycles; defaults to 10.
+    :param logger: Optional shared logger; defaults to this module's logger.
 
     The caller owns and runs the Twisted reactor. Reads are synchronous and
     can block its event loop. No retry or reconnection policy is implemented.
@@ -41,7 +43,9 @@ class Exporter:
         sender: Sender,
         measurements: List[MeasurementRequest],
         interval: float = 10.0,
+        logger: Optional[logging.Logger] = None,
     ):
+        self.logger = logger if logger is not None else logging.getLogger(__name__)
         self.device = device
         self.sender = sender
         self.measurements = measurements
@@ -54,6 +58,7 @@ class Exporter:
         Read or send errors propagate and stop the current cycle. Earlier
         measurements may already have been sent.
         """
+        self.logger.debug("Starting export cycle with %s requests", len(self.measurements))
         for request in self.measurements:
             measurement = self.device.read_measurement(
                 definition=request.definition,
@@ -69,14 +74,16 @@ class Exporter:
         Periodic reads begin in the sender's readiness callback, not immediately
         on returning from this method. Connection errors are not recovered here.
         """
+        self.logger.info("Starting exporter (interval=%s seconds)", self.interval)
         self.device.connect()
         self.sender.connect(
             on_connected=self._start_loop,
         )
-    
+
     def _start_loop(self) -> None:
         """Start the periodic loop and perform its first read immediately.
         """
+        self.logger.info("Sender ready; starting periodic measurements")
         self.loop = LoopingCall(self.run_once)
 
         self.loop.start(
@@ -89,6 +96,7 @@ class Exporter:
 
         This does not stop the reactor. Cleanup exceptions are not suppressed.
         """
+        self.logger.info("Stopping exporter")
         if self.loop is not None and self.loop.running:
             self.loop.stop()
 

@@ -471,7 +471,7 @@ not require a code change.
 
 ### Logging and monitoring
 
-The PoC mainly relies on exceptions and development-server output. A
+The application provides configurable console logging with source locations. A
 production implementation should provide structured logging and useful
 health/error information such as connection state, failed reads,
 WebSocket failures, and reconnect attempts.

@@ -135,7 +135,7 @@ A failed connection raises ``ConnectionError``; an error Modbus response raises
 without an open WebSocket raises ``RuntimeError``. These exceptions are not
 converted into retries. A failed read/send interrupts that cycle; previous
 messages may already have been sent. A failing ``LoopingCall`` stops; the
-exporter does not attach recovery logic to its failure result.
+exporter does not attach a failure handler or retry the cycle.
 
 The Modbus client is synchronous and can block the Twisted event loop. A sender
 close clears its protocol, but does not automatically stop polling or reconnect.
@@ -143,7 +143,7 @@ Shutdown requests a WebSocket close; it does not wait for delivery acknowledgeme
 and cleanup exceptions are not isolated from later cleanup steps.
 
 The implementation does not provide TLS setup (it uses ``connectTCP``),
-authentication, buffering, persistence, reconnect/backoff, structured monitoring,
+authentication, buffering, persistence, reconnect/backoff, metrics and operational monitoring,
 or a deployment service. Future work includes nonblocking device reads, explicit
 failure policies, external customer mappings, payload source identity, and hardware
 validation. The existing separation allows alternate transports and senders to be

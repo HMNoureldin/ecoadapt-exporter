@@ -1,6 +1,7 @@
 """Translate raw register reads into measurements and selected device metadata."""
 
-from typing import Iterable
+import logging
+from typing import Iterable, Optional
 
 from .decoder import decode_registers
 from .models import DeviceInfo, Measurement
@@ -20,11 +21,13 @@ class EcoAdapt:
     """An Eco-Adapt Power-Elec device accessed through an injected transport.
 
     :param transport: Object implementing the transport interface.
+    :param logger: Optional shared logger; defaults to this module's logger.
 
     Construction does not open a connection.
     """
 
-    def __init__(self, transport: Transport):
+    def __init__(self, transport: Transport, logger: Optional[logging.Logger] = None):
+        self.logger = logger if logger is not None else logging.getLogger(__name__)
         self.transport = transport
     
     def connect(self) -> None:
@@ -54,6 +57,7 @@ class EcoAdapt:
 
         Transport errors propagate to the caller.
         """
+        self.logger.debug("Reading measurement type=%s connector=%s channel=%s", definition.measurement_type, connector, channel)
         address = get_channel_address(
             definition,
             connector,
@@ -77,6 +81,7 @@ class EcoAdapt:
                 "Register definition does not represent a measurement"
             )
 
+        self.logger.debug("Decoded measurement type=%s value=%s unit=%s", definition.measurement_type, value, definition.unit)
         return Measurement(
             measurement_type=definition.measurement_type,
             value=value,
@@ -96,6 +101,7 @@ class EcoAdapt:
 
         Special decoders are selected by constant identity. Transport errors propagate.
         """
+        self.logger.debug("Reading general information at address=%s", definition.start_address)
         count = (
             definition.end_address
             - definition.start_address

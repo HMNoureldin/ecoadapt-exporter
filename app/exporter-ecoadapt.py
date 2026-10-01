@@ -3,6 +3,8 @@
 """Wire the device, sender, and exporter into the command-line application."""
 
 import argparse
+import logging
+from typing import Optional
 
 from twisted.internet import reactor
 
@@ -32,6 +34,7 @@ def create_exporter(
     unit_id: int,
     server_url: str,
     interval: float,
+    logger: Optional[logging.Logger] = None,
 ) -> Exporter:
     """Build an exporter without opening network connections.
 
@@ -40,6 +43,7 @@ def create_exporter(
     :param unit_id: Modbus unit identifier.
     :param server_url: Plain WebSocket receiver URL.
     :param interval: Polling interval in seconds.
+    :param logger: Shared logger passed to all runtime collaborators.
     :returns: An exporter configured for RMS voltage and frequency on
         connector 1, channel 1. Edit the request list to change these selections.
     """
@@ -47,11 +51,12 @@ def create_exporter(
         host=device_host,
         port=device_port,
         unit_id=unit_id,
+        logger=logger,
     )
 
-    device = EcoAdapt(transport)
+    device = EcoAdapt(transport, logger=logger)
 
-    sender = WebSocketSender(server_url)
+    sender = WebSocketSender(server_url, logger=logger)
 
     measurements = [
         MeasurementRequest(
@@ -71,7 +76,35 @@ def create_exporter(
         sender=sender,
         measurements=measurements,
         interval=interval,
+        logger=logger,
     )
+
+
+def configure_logging(level: str = "INFO") -> logging.Logger:
+    """Configure application console logging and return its shared logger.
+
+    :param level: DEBUG, INFO, WARNING, ERROR, or CRITICAL (case insensitive).
+    :returns: The application logger, writing formatted records to stderr.
+    :raises ValueError: If the level is unsupported.
+
+    Repeated configuration replaces only this application's handlers.
+    Library constructors never configure handlers or the root logger.
+    """
+    level = level.upper()
+    if level not in ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"):
+        raise ValueError("Unsupported log level: {}".format(level))
+    logger = logging.getLogger("ecoadapt_exporter")
+    for handler in list(logger.handlers):
+        logger.removeHandler(handler)
+        handler.close()
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)s %(name)s %(filename)s:%(lineno)d %(message)s"
+    ))
+    logger.addHandler(handler)
+    logger.setLevel(getattr(logging, level))
+    logger.propagate = False
+    return logger
 
 
 def main():
@@ -109,7 +142,16 @@ def main():
         default=DEFAULT_INTERVAL,
     )
 
+    parser.add_argument(
+        "--log-level",
+        type=str.upper,
+        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
+        default="INFO",
+        help="Application logging threshold (default: INFO)",
+    )
+
     args = parser.parse_args()
+    logger = configure_logging(args.log_level)
 
     exporter = create_exporter(
         device_host=args.device_host,
@@ -117,6 +159,7 @@ def main():
         unit_id=args.unit_id,
         server_url=args.server_url,
         interval=args.interval,
+        logger=logger,
     )
 
     def shutdown():
@@ -131,7 +174,6 @@ def main():
     )
 
     exporter.start()
-
     reactor.run()
 
 

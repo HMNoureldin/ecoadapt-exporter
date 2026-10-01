@@ -88,6 +88,36 @@ The receiver must accept the ``ecoadapt-v1`` WebSocket subprotocol. Ctrl+C
 initiates reactor shutdown and exporter cleanup. See :doc:`testing` to exercise
 the project without hardware.
 
+Logging
+-------
+
+The application configures a shared standard-library logger and injects it into
+``Exporter``, ``EcoAdapt``, ``ModbusTcpTransport``, and ``WebSocketSender`` via
+the optional ``logger=`` constructor argument. Without injection, these classes
+use their module logger; they do not configure handlers. Immutable data models
+and decoder functions do not require logger instances. Autobahn creates protocol
+instances itself; callbacks use the sender's injected logger.
+
+.. code-block:: bash
+
+   make run ARGS="--log-level DEBUG"
+   make run ARGS="--log-level WARNING --device-host 169.254.20.1"
+
+The default threshold is INFO. Supported levels are DEBUG, INFO, WARNING,
+ERROR, and CRITICAL, in increasing severity; the selected level and higher
+severities are emitted. Values are case insensitive. Logs go to stderr with a
+local timestamp (including milliseconds), severity, logger name, source filename,
+and source line number, for example::
+
+   2026-10-01 14:30:00,123 INFO ecoadapt_exporter exporter.py:90 Starting exporter (interval=10.0 seconds)
+
+DEBUG includes register reads, decoded values, export cycles, and queued JSON;
+INFO covers lifecycle events; WARNING reports unclean WebSocket closure; ERROR
+reports transport and disconnected-send failures. Export-cycle errors propagate
+without a custom failure handler; no retries are implemented. Log
+configuration affects this application's logger hierarchy, not all third-party
+libraries or Python warnings. Repeated configuration avoids duplicate handlers.
+
 Select measurements
 -------------------
 
