@@ -1,0 +1,4 @@
+# The transport uses the PyModbus 2.x client.sync and unit APIs.
+pymodbus==2.5.3
+# WebSocket sender with the Twisted networking backend.
+autobahn[twisted]>=26.7.1,<27
