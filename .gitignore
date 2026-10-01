@@ -1,7 +1,8 @@
-.venv-docs/
+
 docs/_build/
 __pycache__/
 *.py[cod]
 
-.venv/
 .pytest_cache/
+
+.venv37/
