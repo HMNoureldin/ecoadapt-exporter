@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 570" role="img" aria-labelledby="title desc">
+<title id="title">Register decoder flow</title><desc id="desc">Input registers are copied, validated, optionally reversed, packed into bytes, and decoded into a Python number.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs>
+<rect width="640" height="570" fill="#ffffff"/>
+<rect x="30" y="15" width="580" height="78" rx="10" fill="#eff6ff" stroke="#2563eb"/><text x="320" y="44" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="bold" fill="#0f172a">Input</text><text x="320" y="70" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#334155">16-bit registers + type + byte/word order</text>
+<path d="M320,93 V122" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="30" y="127" width="580" height="78" rx="10" fill="#eff6ff" stroke="#2563eb"/><text x="320" y="156" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="bold" fill="#0f172a">Copy and validate</text><text x="320" y="182" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#334155">Check count, integer values, and range</text>
+<path d="M320,205 V234" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="30" y="239" width="580" height="78" rx="10" fill="#eff6ff" stroke="#2563eb"/><text x="320" y="268" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="bold" fill="#0f172a">Order registers</text><text x="320" y="294" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#334155">Reverse when WordOrder.LSW_FIRST</text>
+<path d="M320,317 V346" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="30" y="351" width="580" height="78" rx="10" fill="#eff6ff" stroke="#2563eb"/><text x="320" y="380" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="bold" fill="#0f172a">Pack bytes</text><text x="320" y="406" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#334155">Convert each word with ByteOrder</text>
+<path d="M320,429 V458" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="30" y="463" width="580" height="78" rx="10" fill="#eff6ff" stroke="#2563eb"/><text x="320" y="492" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="bold" fill="#0f172a">Decode number</text><text x="320" y="518" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#334155">struct.unpack with type and endianness</text>
+</svg>

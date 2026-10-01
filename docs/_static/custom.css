@@ -1,0 +1,13 @@
+/* Keep the theme's responsive navigation; improve reading space and hierarchy. */
+.wy-nav-content { max-width: 1120px; }
+.wy-side-nav-search { padding: 1.5rem 1rem; }
+.wy-menu-vertical p.caption { color: #5eead4; }
+.rst-content h1, .rst-content h2, .rst-content h3 { color: #134e4a; }
+.overview-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1.5rem 0 2rem; }
+.overview-card { padding: 1.25rem; border: 1px solid #cbd5e1; border-top: 4px solid #0f766e; border-radius: 8px; background: #f8fafc; }
+.overview-card p:last-child { margin-bottom: 0; }
+.rst-content .overview-card a { font-weight: 600; }
+.rst-content dl.py > dt { border-top-color: #0f766e; background: #f0fdfa; color: #134e4a; }
+.rst-content img { height: auto; }
+a:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+@media (max-width: 900px) { .overview-grid { grid-template-columns: 1fr; } }
