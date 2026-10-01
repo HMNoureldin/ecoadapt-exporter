@@ -51,6 +51,8 @@ Configuration and documentation
      - Sphinx 5.3.0 and Read the Docs theme 1.3.0 for Python 3.7.
    * - ``Makefile``
      - Setup, tests, application, development servers, documentation, and cleanup shortcuts.
+   * - ``config.json``
+     - Example settings for the application's optional ``--config`` argument.
    * - ``pytest.ini``
      - Test discovery and source import-path configuration.
    * - ``.gitignore``

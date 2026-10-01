@@ -5,6 +5,7 @@ PYTHON ?= python3.7
 VENV ?= .venv37
 VENV_PYTHON := $(VENV)/bin/python
 ARGS ?=
+CONFIG ?= config.json
 TEST_ARGS ?=
 DOCS_PORT ?= 8000
 SERVER_PORT ?= 9000
@@ -13,7 +14,7 @@ SERVER_PORT ?= 9000
 
 help: ## List available targets (default).
 	@awk 'BEGIN { FS = ":.*## " } /^[a-z-]+:.*## / { printf "  %-20s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
-	@printf '\nOverrides: PYTHON, VENV, ARGS, TEST_ARGS, DOCS_PORT, SERVER_PORT\n'
+	@printf '\nOverrides: PYTHON, VENV, CONFIG, ARGS, TEST_ARGS, DOCS_PORT, SERVER_PORT\n'
 
 venv: ## Create the Python 3.7 environment if it does not exist.
 	@if [ ! -x "$(VENV_PYTHON)" ]; then "$(PYTHON)" -m venv "$(VENV)"; fi
@@ -36,8 +37,8 @@ test: check-env ## Run unit tests without hardware or a WebSocket server.
 test-integration: check-env ## Run the smoke test; first start make server on port 9000.
 	"$(VENV_PYTHON)" -m pytest tests/test_integration.py -v $(TEST_ARGS)
 
-run: check-env ## Run the exporter; supply CLI options with ARGS="...".
-	PYTHONPATH=src "$(VENV_PYTHON)" app/exporter-ecoadapt.py $(ARGS)
+run: check-env ## Run the exporter using CONFIG=config.json.
+	PYTHONPATH=src "$(VENV_PYTHON)" app/exporter-ecoadapt.py --config "$(CONFIG)" $(ARGS)
 
 server: check-env ## Run the development WebSocket receiver (SERVER_PORT=9000).
 	"$(VENV_PYTHON)" dev/server.py --port "$(SERVER_PORT)"

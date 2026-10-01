@@ -1,0 +1,8 @@
+{
+  "device_host": "169.254.20.1",
+  "device_port": 502,
+  "unit_id": 1,
+  "server_url": "ws://127.0.0.1:9000",
+  "interval": 10,
+  "log_level": "INFO"
+}

@@ -3,6 +3,7 @@
 """Wire the device, sender, and exporter into the command-line application."""
 
 import argparse
+import json
 import logging
 from typing import Optional
 
@@ -107,50 +108,40 @@ def configure_logging(level: str = "INFO") -> logging.Logger:
     return logger
 
 
+def parse_settings(argv=None):
+    """Read an optional JSON file, using defaults for omitted settings."""
+    parser = argparse.ArgumentParser(description="Eco-Adapt Modbus exporter")
+    parser.add_argument("--config", help="Path to a JSON configuration file")
+    args = parser.parse_args(argv)
+
+    settings = {
+        "device_host": DEFAULT_DEVICE_HOST,
+        "device_port": DEFAULT_DEVICE_PORT,
+        "unit_id": DEFAULT_UNIT_ID,
+        "server_url": DEFAULT_SERVER_URL,
+        "interval": DEFAULT_INTERVAL,
+        "log_level": "INFO",
+    }
+
+    if args.config:
+        try:
+            with open(args.config, encoding="utf-8") as file:
+                config = json.load(file)
+        except (OSError, ValueError) as error:
+            parser.error("Cannot read configuration: {}".format(error))
+        if not isinstance(config, dict):
+            parser.error("Configuration must be a JSON object")
+        unknown = set(config) - set(settings)
+        if unknown:
+            parser.error("Unknown configuration keys: {}".format(", ".join(sorted(unknown))))
+        settings.update(config)
+
+    return argparse.Namespace(**settings)
+
+
 def main():
-    """Parse CLI options, register shutdown cleanup, start the exporter and reactor.
-    """
-    parser = argparse.ArgumentParser(
-        description="Eco-Adapt Modbus exporter"
-    )
-
-    parser.add_argument(
-        "--device-host",
-        default=DEFAULT_DEVICE_HOST,
-    )
-
-    parser.add_argument(
-        "--device-port",
-        type=int,
-        default=DEFAULT_DEVICE_PORT,
-    )
-
-    parser.add_argument(
-        "--unit-id",
-        type=int,
-        default=DEFAULT_UNIT_ID,
-    )
-
-    parser.add_argument(
-        "--server-url",
-        default=DEFAULT_SERVER_URL,
-    )
-
-    parser.add_argument(
-        "--interval",
-        type=float,
-        default=DEFAULT_INTERVAL,
-    )
-
-    parser.add_argument(
-        "--log-level",
-        type=str.upper,
-        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
-        default="INFO",
-        help="Application logging threshold (default: INFO)",
-    )
-
-    args = parser.parse_args()
+    """Load settings, configure logging, and start the exporter and reactor."""
+    args = parse_settings()
     logger = configure_logging(args.log_level)
 
     exporter = create_exporter(

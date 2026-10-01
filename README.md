@@ -173,6 +173,7 @@ ecoadapt-exporter/
 │   ├── testing.rst
 │   └── usage.rst
 ├── .gitignore
+├── config.json           # Example connection settings
 ├── Makefile                      # Development command shortcuts
 ├── pytest.ini
 ├── requirements.txt              # Runtime dependencies
@@ -199,7 +200,7 @@ activating the environment is optional. Run `make` or `make help` to list target
 | `make check` | Show Python version and check dependency consistency |
 | `make test` | Run unit tests without hardware or a WebSocket server |
 | `make test-integration` | Run the integration smoke test against port 9000 |
-| `make run` | Run the exporter with its default settings (requires a device) |
+| `make run` | Run the exporter using config.json (requires a device) |
 | `make server` | Start the development WebSocket receiver |
 | `make sender` | Send a sample measurement to the receiver on port 9000 |
 | `make docs` | Rebuild documentation with warnings treated as errors |
@@ -217,7 +218,7 @@ Examples of overrides:
 
 ```bash
 make test TEST_ARGS="-k frequency -q"
-make run ARGS="--device-host 169.254.20.1 --interval 5"
+make run
 make run ARGS="--help"
 make show-docs DOCS_PORT=8080
 make server SERVER_PORT=9001
@@ -226,7 +227,7 @@ make server SERVER_PORT=9001
 For `make test-integration` and `make sender`, first run `make server` in
 another terminal with its default port 9000. The smoke test does not assert
 delivery; inspect the receiver output. When changing the receiver port for
-`make run`, also pass the matching `--server-url` through `ARGS`.
+`make run`, set the matching `server_url` in your JSON file.
 
 To rebuild the environment from scratch, stop processes using it, run
 `deactivate` if it is active, then run `make clean-venv` followed by
@@ -399,26 +400,40 @@ WebSocket server:     ws://127.0.0.1:9000
 Measurement interval: 10 seconds
 ```
 
-These values can be changed using command-line arguments:
+Change these values in a JSON configuration file, then run:
 
-``` bash
-PYTHONPATH=src .venv37/bin/python \
-    app/exporter-ecoadapt.py \
-    --device-host 169.254.20.1 \
-    --device-port 502 \
-    --unit-id 1 \
-    --server-url ws://127.0.0.1:9000 \
-    --interval 10
+```bash
+make run
 ```
 
 The current measurement configuration is defined in the application
 entry point. It reads RMS voltage and frequency, with connector and
 channel configured per measurement request.
 
+## Configuration file
+
+Edit `config.json` for your device, then run:
+
+```bash
+make run
+```
+
+`config.json` contains the default settings and can be committed with the project.
+The file is optional and only loaded when
+`--config` is passed; relative paths are resolved from your working directory.
+Values in the file replace defaults. Missing settings keep their default values.
+`make run` passes `config.json` automatically. Use `make run CONFIG=other.json`
+to choose another file. Running the Python application directly without
+`--config` uses all built-in defaults.
+An explicitly supplied file must exist and contain a JSON object with recognized
+setting names. Use JSON numbers for ports, unit ID, and interval.
+The sender currently accepts plain `ws://` endpoints, not `wss://`.
+Measurement selection remains in `create_exporter()`.
+
 ## Configuration decisions
 
 For this proof of concept, the device and server connections are
-configurable through command-line arguments.
+configurable through an optional JSON file. Omitted values use built-in defaults.
 
 The measurement list is intentionally kept in the application wiring
 rather than introducing a larger configuration system. This keeps the

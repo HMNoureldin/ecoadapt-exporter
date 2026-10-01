@@ -31,7 +31,7 @@ Use ``make run ARGS="--help"`` for application options or
 environment path. ``DOCS_PORT`` changes the documentation server port;
 ``SERVER_PORT`` changes the development receiver port. The manual sender and
 integration test always use port 9000; for the exporter, match a changed
-receiver port with ``ARGS="--server-url ws://127.0.0.1:9001"``.
+receiver port by setting ``server_url`` in the JSON file.
 
 ``make clean`` does not delete the environment or stop running servers.
 Use ``make clean-venv`` to delete the environment and its installed packages
@@ -75,15 +75,11 @@ With a reachable physical Modbus device, run the exporter in another terminal:
 
 .. code-block:: bash
 
-   PYTHONPATH=src .venv37/bin/python app/exporter-ecoadapt.py \
-       --device-host 169.254.20.1 \
-       --device-port 502 \
-       --unit-id 1 \
-       --server-url ws://127.0.0.1:9000 \
-       --interval 10
+   make run
 
-These are the default values. ``--help`` prints available options without
-connecting. Use a plain ``ws://`` endpoint; this sender does not configure TLS.
+This automatically reads ``config.json``. Use ``make run CONFIG=other.json``
+to choose a different file. ``--help`` prints options without connecting.
+Use a plain ``ws://`` endpoint; this sender does not configure TLS.
 The receiver must accept the ``ecoadapt-v1`` WebSocket subprotocol. Ctrl+C
 initiates reactor shutdown and exporter cleanup. See :doc:`testing` to exercise
 the project without hardware.
@@ -100,9 +96,9 @@ instances itself; callbacks use the sender's injected logger.
 
 .. code-block:: bash
 
-   make run ARGS="--log-level DEBUG"
-   make run ARGS="--log-level WARNING --device-host 169.254.20.1"
+   make run
 
+Set ``"log_level": "DEBUG"`` in your JSON file for debugging.
 The default threshold is INFO. Supported levels are DEBUG, INFO, WARNING,
 ERROR, and CRITICAL, in increasing severity; the selected level and higher
 severities are emitted. Values are case insensitive. Logs go to stderr with a
@@ -117,6 +113,25 @@ reports transport and disconnected-send failures. Export-cycle errors propagate
 without a custom failure handler; no retries are implemented. Log
 configuration affects this application's logger hierarchy, not all third-party
 libraries or Python warnings. Repeated configuration avoids duplicate handlers.
+
+JSON configuration
+------------------
+
+.. code-block:: bash
+
+   make run
+
+Edit ``config.json`` to set the six connection, polling, and logging settings.
+The file is included in the project and is not ignored by Git. Files are loaded only with ``--config``;
+relative paths use the current working directory. File values replace defaults;
+missing settings retain their defaults. When running the Python application directly without ``--config``, all defaults
+apply. ``make run`` supplies ``--config config.json`` automatically.
+Unreadable files, malformed JSON, and unknown keys produce a CLI error.
+Use JSON numbers for numeric settings and a plain ``ws://`` receiver URL.
+Measurement selection remains in the application request list.
+
+.. literalinclude:: ../config.json
+   :language: json
 
 Select measurements
 -------------------

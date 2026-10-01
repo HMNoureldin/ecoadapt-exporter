@@ -103,7 +103,8 @@ the outgoing payload. A production protocol would need to address this.
 Configuration and device metadata
 ---------------------------------
 
-Connection settings are CLI options. Measurement selection is a list in
+Connection settings come from an optional JSON file passed with ``--config``.
+Missing settings use built-in defaults. Measurement selection is a list in
 ``create_exporter()`` rather than an external configuration file. Each request
 owns its connector/channel pair, allowing different locations in one cycle.
 
