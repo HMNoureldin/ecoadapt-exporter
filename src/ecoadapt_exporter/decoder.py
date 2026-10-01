@@ -1,18 +1,26 @@
+"""Decode numeric Modbus values independently of device access and networking."""
+
 import struct
 from enum import Enum
 
 
 class ByteOrder(Enum):
+    """Byte significance within each 16-bit register.
+    """
     MSB_FIRST = "big"
     LSB_FIRST = "little"
 
 
 class WordOrder(Enum):
+    """Word significance across a multi-register value.
+    """
     MSW_FIRST = "msw"
     LSW_FIRST = "lsw"
 
 
 class DataType(Enum):
+    """Supported signed, unsigned, and IEEE floating-point numeric formats.
+    """
     UINT16 = "uint16"
     INT16 = "int16"
     UINT32 = "uint32"
@@ -47,15 +55,18 @@ def decode_registers(
     byte_order=ByteOrder.MSB_FIRST,
     word_order=WordOrder.MSW_FIRST,
 ):
-    """
-    Decode one or more 16-bit Modbus registers into a Python value.
+    """Decode a register sequence without modifying the input.
 
-    The number of registers required depends on the data type.
+    :param registers: Iterable of unsigned 16-bit integer register values.
+    :param data_type: A :class:`DataType` selecting format and register count.
+    :param byte_order: Byte significance within each register.
+    :param word_order: Word significance across the register sequence.
+    :returns: An integer or float, according to ``data_type``.
+    :raises ValueError: If the type, register count, or register values are invalid.
 
-    Examples:
-        UINT16  -> 1 register
-        FLOAT32 -> 2 registers
-        FLOAT64 -> 4 registers
+    UINT16 and INT16 require one register; UINT32, INT32, and FLOAT32 require
+    two; FLOAT64 requires four. Words and bytes are normalized before a
+    big-endian unpack. Pass enum members for ordering arguments.
     """
     words = list(registers)
 
@@ -108,14 +119,12 @@ def decode_uint8_pair(
     register,
     byte_order=ByteOrder.MSB_FIRST,
 ):
-    """
-    Split one 16-bit register into two unsigned 8-bit values.
+    """Split one register into two unsigned bytes in the requested order.
 
-    Example:
-
-        0x0106 -> (1, 6)
-
-    when byte_order is MSB_FIRST.
+    :param register: Integer from 0 through 65535.
+    :param byte_order: Which byte to return first; defaults to MSB first.
+    :returns: A pair of integers; ``0x0106`` gives ``(1, 6)`` with MSB first.
+    :raises ValueError: If the register is not an unsigned 16-bit integer.
     """
     _validate_register_value(register)
 

@@ -1,3 +1,5 @@
+"""Check channel addressing and device-specific version and MAC decoding."""
+
 from ecoadapt_exporter.registers import (
     RMS_VOLTAGE,
     decode_mac_address,

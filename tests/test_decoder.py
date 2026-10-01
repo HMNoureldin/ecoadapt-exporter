@@ -1,3 +1,5 @@
+"""Check the device FLOAT32 least-significant-word-first decoding example."""
+
 import pytest
 
 from ecoadapt_exporter.decoder import (

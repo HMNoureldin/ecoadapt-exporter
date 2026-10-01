@@ -1,7 +1,7 @@
 ByteOrder
 =========
 
-Control byte ordering when packing registers and unpacking the value.
+Control byte significance within each register before the final big-endian unpack.
 
 .. autoclass:: ecoadapt_exporter.decoder.ByteOrder
    :members:

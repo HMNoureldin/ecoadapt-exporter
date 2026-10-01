@@ -1,15 +1,21 @@
 Python API
 ==========
 
-.. automodule:: ecoadapt_exporter.decoder
+The reusable package is organized by responsibility. Module references include
+public classes, methods, functions, and register constants, with source links.
 
-Select a function or enum below. Each page includes its documentation and
-links to the Python source.
+.. automodule:: ecoadapt_exporter
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   api/decode_registers
-   api/data_type
-   api/byte_order
-   api/word_order
+   api/decoder
+   api/registers
+   api/models
+   api/transport
+   api/ecoadapt
+   api/sender
+   api/exporter
+
+Application wiring and development scripts are documented in :doc:`scripts`.
+Test collaborators and coverage are documented in :doc:`testing`.

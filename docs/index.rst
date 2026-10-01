@@ -1,19 +1,21 @@
 EcoAdapt Exporter
 =================
 
-From device registers to Python values
---------------------------------------
+From sensor registers to WebSocket measurements
+-----------------------------------------------
 
-Decode 16-bit registers into integers and floating-point values, with
-configurable byte and word ordering.
+This proof of concept reads an Eco-Adapt device over Modbus TCP, decodes
+registers into typed measurements, and sends JSON messages to a WebSocket
+receiver. The application selects RMS voltage and frequency on connector 1,
+channel 1. Device metadata can also be queried through the Python API.
 
 .. container:: overview-grid
 
    .. container:: overview-card
 
-      **Start here**
+      **Run the project**
 
-      Decode your first value and understand supported formats.
+      Set up Python 3.7, start the receiver, and configure the exporter.
 
       :doc:`Read the usage guide <usage>`
 
@@ -21,7 +23,7 @@ configurable byte and word ordering.
 
       **Explore the API**
 
-      Browse the decoder function and its configuration enums.
+      Browse device access, registers, decoding, sending, and orchestration.
 
       :doc:`Browse the Python API <api>`
 
@@ -29,50 +31,39 @@ configurable byte and word ordering.
 
       **Understand the design**
 
-      Follow registers through validation, packing, and decoding.
+      Follow dependencies, startup callbacks, measurement flow, and shutdown.
 
       :doc:`View the architecture <architecture>`
 
-Quick example
--------------
+Start without hardware
+----------------------
 
-.. code-block:: python
+The unit tests inject fake transports, devices, and senders. The integration
+smoke test combines fake Modbus data with a real local WebSocket connection.
+See :doc:`testing` for what each test actually verifies.
 
-   from ecoadapt_exporter.decoder import DataType, decode_registers
-
-   value = decode_registers([0x3F80, 0x0000], DataType.FLOAT32)
-   print(value)  # 1.0
-
-Project at a glance
+Documentation scope
 -------------------
 
-.. list-table::
-   :header-rows: 1
-   :widths: 30 70
-
-   * - Component
-     - Responsibility
-   * - :doc:`decoder module <api>`
-     - Convert register sequences into Python numbers.
-   * - :doc:`decode_registers <api/decode_registers>`
-     - Validate, order, pack, and decode register values.
-   * - Configuration enums
-     - Select the :doc:`numeric type <api/data_type>`,
-       :doc:`byte order <api/byte_order>`, and :doc:`word order <api/word_order>`.
+:doc:`project` maps every source, development, test, and configuration file to
+its role. Public package APIs use Sphinx docstrings; script sources are shown
+without importing scripts that start networking as a side effect.
 
 .. toctree::
-   :hidden:
+   :maxdepth: 2
    :caption: Guides
 
    usage
    architecture
+   testing
+   project
 
 .. toctree::
-   :hidden:
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Reference
 
    api
+   scripts
 
 .. toctree::
    :hidden:

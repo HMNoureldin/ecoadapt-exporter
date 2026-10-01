@@ -168,6 +168,9 @@ ecoadapt-exporter/
 │   ├── architecture.rst
 │   ├── conf.py
 │   ├── index.rst
+│   ├── project.rst
+│   ├── scripts.rst
+│   ├── testing.rst
 │   └── usage.rst
 ├── .gitignore
 ├── pytest.ini
@@ -187,7 +190,8 @@ are excluded from Git and omitted from the tree above.
 ## Installation and Python compatibility
 
 The assignment requires compatibility with Python 3.7.3. Development and
-testing are therefore performed in a Python 3.7 environment.
+testing currently use Python 3.7.17; execution on exactly Python 3.7.3
+has not yet been verified.
 
 Use one virtual environment, `.venv37`, for the application, tests, and
 documentation.
@@ -225,10 +229,10 @@ target interpreter so pip selects compatible transitive dependencies.
 
 ## Running the tests
 
-Run the complete test suite:
+Run the unit tests without hardware or a listening WebSocket server:
 
 ``` bash
-.venv37/bin/python -m pytest -v
+.venv37/bin/python -m pytest --ignore=tests/test_integration.py -v
 ```
 
 The tests cover the main layers independently:
@@ -250,10 +254,7 @@ test_exporter.py
     FakeSender
 
 test_sender.py
-    WebSocketSender
-        |
-        v
-    WebSocket server
+    Sender abstraction and disconnected-state checks
 
 test_integration.py
     FakeTransport
@@ -304,13 +305,12 @@ Then run:
 .venv37/bin/python -m pytest tests/test_integration.py -v
 ```
 
-The integration test verifies the application flow from the fake Modbus
+The integration smoke test exercises the application flow from the fake Modbus
 transport through `EcoAdapt`, `Exporter`, and the real
 `WebSocketSender`.
 
-The development server currently prints received messages rather than
-exposing them as test assertions, so its output can also be inspected to
-confirm receipt.
+The test contains no delivery assertions and may pass without a successful
+connection. Inspect the development server output to confirm receipt.
 
 ## Running the development WebSocket server
 
@@ -515,9 +515,10 @@ Then visit `http://localhost:8000`.
 Stop the server with `Ctrl+C`.
 
 The site uses the Read the Docs theme with expandable sidebar
-navigation, separate function and enum pages, search, source links,
-usage examples, and an architecture page with an offline SVG flow
-diagram.
+navigation, API references for all runtime modules, script and test guides,
+a file inventory, search, and source links. The architecture guide explains
+layer responsibilities, startup and shutdown, measurement flow, configuration,
+and current limitations, with an offline decoder flow diagram.
 
 Rebuild the documentation after editing docstrings or documentation. Add
 new modules to `docs/api.rst` using `automodule` directives as the

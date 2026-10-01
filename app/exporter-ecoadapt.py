@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Wire the device, sender, and exporter into the command-line application."""
+
 import argparse
 
 from twisted.internet import reactor
@@ -31,6 +33,16 @@ def create_exporter(
     server_url: str,
     interval: float,
 ) -> Exporter:
+    """Build an exporter without opening network connections.
+
+    :param device_host: Modbus device hostname or IP address.
+    :param device_port: Modbus TCP port.
+    :param unit_id: Modbus unit identifier.
+    :param server_url: Plain WebSocket receiver URL.
+    :param interval: Polling interval in seconds.
+    :returns: An exporter configured for RMS voltage and frequency on
+        connector 1, channel 1. Edit the request list to change these selections.
+    """
     transport = ModbusTcpTransport(
         host=device_host,
         port=device_port,
@@ -63,6 +75,8 @@ def create_exporter(
 
 
 def main():
+    """Parse CLI options, register shutdown cleanup, start the exporter and reactor.
+    """
     parser = argparse.ArgumentParser(
         description="Eco-Adapt Modbus exporter"
     )
@@ -106,6 +120,8 @@ def main():
     )
 
     def shutdown():
+        """Close exporter resources before reactor shutdown.
+        """
         exporter.stop()
 
     reactor.addSystemEventTrigger(

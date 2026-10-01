@@ -28,6 +28,10 @@
 # A local webserver to receive message sent by exporter. For dev and debugging only!
 #
 
+"""Print incoming WebSocket messages for manual development checks.
+
+Run as a script; the receiver binds all interfaces on port 9000 by default."""
+
 import asyncio
 import argparse
 
@@ -37,20 +41,40 @@ WEBSOCKET_SUBPROTOCOL = "ecoadapt-v1"
 
 class MyServerProtocol(WebSocketServerProtocol):
 
+    """Console receiver for the ``ecoadapt-v1`` development subprotocol.
+    """
     def onConnect(self, request):
+        """Log the peer and select the development subprotocol.
+
+        :param request: Autobahn connection request.
+        :returns: The ``ecoadapt-v1`` subprotocol name.
+        """
         print("Client connecting: {0}".format(request.peer))
         return WEBSOCKET_SUBPROTOCOL
 
     async def onOpen(self):
+        """Log completion of the WebSocket handshake.
+        """
         print("WebSocket connection open.")
 
     def onMessage(self, payload, isBinary):
+        """Print a received message or binary payload length.
+
+        :param payload: Message bytes supplied by Autobahn.
+        :param isBinary: Whether the frame contains binary data.
+        """
         if isBinary:
             print("Binary message received: {0} bytes".format(len(payload)))
         else:
             print("Text message received: {0}".format(payload.decode("utf8")))
 
     def onClose(self, wasClean, code, reason):
+        """Log connection closure.
+
+        :param wasClean: Whether the close handshake completed cleanly.
+        :param code: Close status from Autobahn.
+        :param reason: Human-readable close description.
+        """
         print("WebSocket connection closed: {0}".format(reason))
 
 

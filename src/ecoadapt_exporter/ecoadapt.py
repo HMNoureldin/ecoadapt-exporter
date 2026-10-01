@@ -1,3 +1,5 @@
+"""Translate raw register reads into measurements and selected device metadata."""
+
 from typing import Iterable
 
 from .decoder import decode_registers
@@ -15,17 +17,24 @@ from .registers import (
 from .transport import Transport
 
 class EcoAdapt:
-    """
-    Represents an Eco-Adapt Power-Elec device.
+    """An Eco-Adapt Power-Elec device accessed through an injected transport.
+
+    :param transport: Object implementing the transport interface.
+
+    Construction does not open a connection.
     """
 
     def __init__(self, transport: Transport):
         self.transport = transport
     
     def connect(self) -> None:
+        """Delegate connection establishment to the transport.
+        """
         self.transport.connect()
     
     def close(self) -> None:
+        """Delegate connection cleanup to the transport.
+        """
         self.transport.close()
     
     def read_measurement(
@@ -34,6 +43,17 @@ class EcoAdapt:
         connector: int,
         channel: int,
     ) -> Measurement:
+        """Read and decode one configured measurement.
+
+        :param definition: Circuit register definition with a measurement identity.
+        :param connector: Connector number, from 1 through 6.
+        :param channel: Channel number, from 1 through 3.
+        :returns: An immutable :class:`~ecoadapt_exporter.models.Measurement`.
+        :raises ValueError: For invalid addressing, register data, or a definition
+            whose measurement type is ``None``.
+
+        Transport errors propagate to the caller.
+        """
         address = get_channel_address(
             definition,
             connector,
@@ -67,6 +87,15 @@ class EcoAdapt:
         self,
         definition: GeneralRegisterDefinition,
     ):
+        """Read one device-wide information field.
+
+        :param definition: General register definition. Use the module constants
+            ``SOFTWARE_VERSION`` and ``MAC_ADDRESS`` for their special decoders.
+        :returns: A version/MAC string for special fields, otherwise a decoded number.
+        :raises ValueError: If register count or data is invalid.
+
+        Special decoders are selected by constant identity. Transport errors propagate.
+        """
         count = (
             definition.end_address
             - definition.start_address
@@ -100,6 +129,13 @@ class EcoAdapt:
         self,
         definitions: Iterable[GeneralRegisterDefinition],
     ) -> DeviceInfo:
+        """Read a selected set of metadata fields.
+
+        :param definitions: Iterable containing ``SOFTWARE_VERSION``,
+            ``MODBUS_TABLE_VERSION``, and/or ``MAC_ADDRESS`` constants.
+        :returns: A :class:`~ecoadapt_exporter.models.DeviceInfo` with other fields unset.
+        :raises ValueError: If a definition is unsupported or its data is invalid.
+        """
         software_version = None
         modbus_table_version = None
         mac_address = None

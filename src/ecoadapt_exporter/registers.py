@@ -1,3 +1,5 @@
+"""Eco-Adapt register metadata, channel addressing, and device-specific codecs."""
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
@@ -15,6 +17,8 @@ from .decoder import (
 # ---------------------------------------------------------------------------
 
 class Unit(Enum):
+    """Engineering-unit strings used in measurements and JSON payloads.
+    """
     KWH = "kWh"
     KVARH = "kVArh"
     WATT = "W"
@@ -27,6 +31,8 @@ class Unit(Enum):
 
 
 class MeasurementType(Enum):
+    """Stable measurement identifiers sent to the WebSocket receiver.
+    """
     ACTIVE_ENERGY_IMPORT = "active_energy_import"
     REACTIVE_ENERGY_IMPORT = "reactive_energy_import"
     ACTIVE_ENERGY_EXPORT = "active_energy_export"
@@ -42,6 +48,8 @@ class MeasurementType(Enum):
 
 
 class CircuitConfiguration(Enum):
+    """Device configuration codes for disabled and supported circuit arrangements.
+    """
     DISABLED = 0x0000
     SINGLE_PHASE = 0x0001
     THREE_PHASE_WITH_NEUTRAL = 0x0002
@@ -52,6 +60,8 @@ class CircuitConfiguration(Enum):
 
 
 class RegisterEncoding(Enum):
+    """Metadata identifying special general-information encodings.
+    """
     SOFTWARE_VERSION = "software_version"
     MAC_ADDRESS = "mac_address"
 
@@ -62,6 +72,14 @@ class RegisterEncoding(Enum):
 
 @dataclass(frozen=True)
 class RegisterDefinition:
+    """An inclusive register range and its numeric decoding settings.
+
+    :param start_address: First Modbus address in the range.
+    :param end_address: Last Modbus address in the range, inclusive.
+    :param data_type: Numeric representation.
+    :param byte_order: Byte order within each register.
+    :param word_order: Word order across a value.
+    """
     start_address: int
     end_address: int
     data_type: DataType
@@ -71,11 +89,26 @@ class RegisterDefinition:
 
 @dataclass(frozen=True)
 class GeneralRegisterDefinition(RegisterDefinition):
+    """Device-wide register metadata.
+
+    :param encoding: Optional special encoding label. The current device reader
+        dispatches special decoding by constant identity, not by this field.
+
+    Inherits the range and decoding fields of :class:`RegisterDefinition`.
+    """
     encoding: Optional[RegisterEncoding] = None
 
 
 @dataclass(frozen=True)
 class CircuitRegisterDefinition(RegisterDefinition):
+    """Register metadata shared by the device's 18 channel positions.
+
+    :param unit: Engineering unit of decoded values.
+    :param words_per_channel: Number of consecutive registers per channel.
+    :param measurement_type: Measurement identity, or ``None`` for configuration.
+
+    Inherits the range and decoding fields of :class:`RegisterDefinition`.
+    """
     unit: Unit
     words_per_channel: int
     measurement_type: Optional[MeasurementType]
@@ -85,6 +118,7 @@ class CircuitRegisterDefinition(RegisterDefinition):
 # General information
 # ---------------------------------------------------------------------------
 
+#: Register definition for software version.
 SOFTWARE_VERSION = GeneralRegisterDefinition(
     start_address=0,
     end_address=0,
@@ -95,6 +129,7 @@ SOFTWARE_VERSION = GeneralRegisterDefinition(
 )
 
 
+#: Register definition for modbus table version.
 MODBUS_TABLE_VERSION = GeneralRegisterDefinition(
     start_address=1,
     end_address=1,
@@ -104,6 +139,7 @@ MODBUS_TABLE_VERSION = GeneralRegisterDefinition(
 )
 
 
+#: Register definition for mac address.
 MAC_ADDRESS = GeneralRegisterDefinition(
     start_address=2,
     end_address=4,
@@ -118,6 +154,7 @@ MAC_ADDRESS = GeneralRegisterDefinition(
 # Circuit information
 # ---------------------------------------------------------------------------
 
+#: Register definition for circuit configuration.
 CIRCUIT_CONFIGURATION = CircuitRegisterDefinition(
     start_address=8,
     end_address=25,
@@ -130,6 +167,7 @@ CIRCUIT_CONFIGURATION = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for active energy import index.
 ACTIVE_ENERGY_IMPORT_INDEX = CircuitRegisterDefinition(
     start_address=28,
     end_address=63,
@@ -142,6 +180,7 @@ ACTIVE_ENERGY_IMPORT_INDEX = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for reactive energy import index.
 REACTIVE_ENERGY_IMPORT_INDEX = CircuitRegisterDefinition(
     start_address=64,
     end_address=99,
@@ -154,6 +193,7 @@ REACTIVE_ENERGY_IMPORT_INDEX = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for active energy export index.
 ACTIVE_ENERGY_EXPORT_INDEX = CircuitRegisterDefinition(
     start_address=100,
     end_address=135,
@@ -166,6 +206,7 @@ ACTIVE_ENERGY_EXPORT_INDEX = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for reactive energy export index.
 REACTIVE_ENERGY_EXPORT_INDEX = CircuitRegisterDefinition(
     start_address=136,
     end_address=171,
@@ -178,6 +219,7 @@ REACTIVE_ENERGY_EXPORT_INDEX = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for active power.
 ACTIVE_POWER = CircuitRegisterDefinition(
     start_address=172,
     end_address=207,
@@ -190,6 +232,7 @@ ACTIVE_POWER = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for reactive power.
 REACTIVE_POWER = CircuitRegisterDefinition(
     start_address=208,
     end_address=243,
@@ -202,6 +245,7 @@ REACTIVE_POWER = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for power factor.
 POWER_FACTOR = CircuitRegisterDefinition(
     start_address=244,
     end_address=279,
@@ -214,6 +258,7 @@ POWER_FACTOR = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for rms current.
 RMS_CURRENT = CircuitRegisterDefinition(
     start_address=280,
     end_address=315,
@@ -226,6 +271,7 @@ RMS_CURRENT = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for rms current one min average.
 RMS_CURRENT_ONE_MIN_AVERAGE = CircuitRegisterDefinition(
     start_address=316,
     end_address=351,
@@ -238,6 +284,7 @@ RMS_CURRENT_ONE_MIN_AVERAGE = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for rms voltage.
 RMS_VOLTAGE = CircuitRegisterDefinition(
     start_address=352,
     end_address=387,
@@ -250,6 +297,7 @@ RMS_VOLTAGE = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for rms voltage one min average.
 RMS_VOLTAGE_ONE_MIN_AVERAGE = CircuitRegisterDefinition(
     start_address=388,
     end_address=423,
@@ -262,6 +310,7 @@ RMS_VOLTAGE_ONE_MIN_AVERAGE = CircuitRegisterDefinition(
 )
 
 
+#: Register definition for frequency.
 FREQUENCY = CircuitRegisterDefinition(
     start_address=424,
     end_address=459,
@@ -279,6 +328,12 @@ FREQUENCY = CircuitRegisterDefinition(
 # ---------------------------------------------------------------------------
 
 def decode_software_version(register: int) -> str:
+    """Decode a major/minor software version.
+
+    :param register: Unsigned register with major in the high byte.
+    :returns: A string such as ``"1.6"``.
+    :raises ValueError: If the register value is invalid.
+    """
     major, minor = decode_uint8_pair(
         register,
         byte_order=ByteOrder.MSB_FIRST,
@@ -287,6 +342,12 @@ def decode_software_version(register: int) -> str:
 
 
 def decode_mac_address(registers) -> str:
+    """Decode three registers into a six-byte MAC address.
+
+    :param registers: Iterable of exactly three unsigned 16-bit integers.
+    :returns: Uppercase hexadecimal bytes separated by colons.
+    :raises ValueError: If the count or any register value is invalid.
+    """
     registers = list(registers)
 
     if len(registers) != 3:
@@ -310,6 +371,12 @@ def decode_mac_address(registers) -> str:
 def decode_circuit_configuration(
     register: int,
 ) -> CircuitConfiguration:
+    """Interpret a circuit configuration code.
+
+    :param register: Numeric configuration code.
+    :returns: The corresponding :class:`CircuitConfiguration` member.
+    :raises ValueError: If the code is unknown.
+    """
     try:
         return CircuitConfiguration(register)
     except ValueError:
@@ -327,6 +394,14 @@ def get_channel_address(
     connector: int,
     channel: int,
 ) -> int:
+    """Calculate the first register address for a connector/channel pair.
+
+    :param definition: Circuit register range and stride.
+    :param connector: One-based connector number, from 1 through 6.
+    :param channel: One-based channel number, from 1 through 3.
+    :returns: ``start_address + ((connector - 1) * 3 + channel - 1) * stride``.
+    :raises ValueError: If either index or the resulting range is invalid.
+    """
     if not 1 <= connector <= 6:
         raise ValueError("Connector must be between 1 and 6")
 

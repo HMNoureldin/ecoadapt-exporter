@@ -1,3 +1,5 @@
+"""Check device measurements and general information using fake registers."""
+
 import pytest
 
 from ecoadapt_exporter.ecoadapt import EcoAdapt

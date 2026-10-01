@@ -1,3 +1,5 @@
+"""Check sender abstraction, initial state, and disconnected-send rejection."""
+
 import pytest
 
 from ecoadapt_exporter.models import Measurement

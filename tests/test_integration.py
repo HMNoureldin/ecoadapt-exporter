@@ -1,3 +1,7 @@
+"""Exercise a real local WebSocket with fake device data.
+
+Requires the development server; completion alone does not assert message delivery."""
+
 import pytest
 
 from ecoadapt_exporter.ecoadapt import EcoAdapt
