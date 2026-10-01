@@ -173,6 +173,7 @@ ecoadapt-exporter/
 │   ├── testing.rst
 │   └── usage.rst
 ├── .gitignore
+├── Makefile                      # Development command shortcuts
 ├── pytest.ini
 ├── requirements.txt              # Runtime dependencies
 ├── requirements-dev.txt          # Runtime and test dependencies
@@ -186,6 +187,54 @@ while manual development tools are under `dev/`.
 
 The local `.venv37/` environment and generated `docs/_build/` directory
 are excluded from Git and omitted from the tree above.
+
+## Makefile shortcuts
+
+Run these commands from the project root. They use `.venv37` directly, so
+activating the environment is optional. Run `make` or `make help` to list targets.
+
+| Command | Purpose |
+| --- | --- |
+| `make install` | Create the environment if missing and install all dependencies |
+| `make check` | Show Python version and check dependency consistency |
+| `make test` | Run unit tests without hardware or a WebSocket server |
+| `make test-integration` | Run the integration smoke test against port 9000 |
+| `make run` | Run the exporter with its default settings (requires a device) |
+| `make server` | Start the development WebSocket receiver |
+| `make sender` | Send a sample measurement to the receiver on port 9000 |
+| `make docs` | Rebuild documentation with warnings treated as errors |
+| `make show-docs` | Build and serve documentation at http://localhost:8000 |
+| `make clean` | Remove generated documentation and project caches; keep `.venv37` |
+| `make clean-venv` | Delete the virtual environment and its installed packages |
+
+If Python 3.7 is installed through pyenv but not on your PATH:
+
+```bash
+make install PYTHON="$HOME/.pyenv/versions/3.7.17/bin/python"
+```
+
+Examples of overrides:
+
+```bash
+make test TEST_ARGS="-k frequency -q"
+make run ARGS="--device-host 169.254.20.1 --interval 5"
+make run ARGS="--help"
+make show-docs DOCS_PORT=8080
+make server SERVER_PORT=9001
+```
+
+For `make test-integration` and `make sender`, first run `make server` in
+another terminal with its default port 9000. The smoke test does not assert
+delivery; inspect the receiver output. When changing the receiver port for
+`make run`, also pass the matching `--server-url` through `ARGS`.
+
+To rebuild the environment from scratch, stop processes using it, run
+`deactivate` if it is active, then run `make clean-venv` followed by
+`make install` (with the `PYTHON` override above if needed). `clean-venv`
+uses `VENV`, defaults to `.venv37`, and leaves source files and built docs intact.
+
+Use Ctrl+C to stop the exporter or either server. `make clean` does not stop
+running processes. `VENV` can override the environment path if needed.
 
 ## Installation and Python compatibility
 

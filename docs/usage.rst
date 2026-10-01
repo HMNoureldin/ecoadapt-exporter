@@ -1,6 +1,45 @@
 Setup and usage
 ===============
 
+Makefile shortcuts
+------------------
+
+Run ``make help`` from the project root to list available commands. Targets use
+``.venv37/bin/python`` directly; activation is optional.
+
+.. code-block:: bash
+
+   make install       # Create the environment if missing; install all dependencies
+   make check         # Python version and dependency consistency
+   make test          # Unit tests without network services
+   make server        # Development receiver; leave running in another terminal
+   make test-integration  # Smoke test against the receiver on port 9000
+   make sender        # Manual sample sender to port 9000
+   make run           # Exporter; requires a reachable Modbus device
+   make docs          # Fresh HTML build, failing on warnings
+   make show-docs     # Build and serve at http://localhost:8000
+   make clean         # Delete generated docs and project caches, retaining the environment
+
+These commands are alternatives, not a script to run sequentially: server and
+application targets stay running until Ctrl+C. The integration smoke test still
+requires manual inspection of receiver output to confirm delivery.
+
+Override ``PYTHON`` when creating an environment, for example
+``make install PYTHON="$HOME/.pyenv/versions/3.7.17/bin/python"``.
+Use ``make run ARGS="--help"`` for application options or
+``make test TEST_ARGS="-k frequency"`` to filter tests. ``VENV`` changes the
+environment path. ``DOCS_PORT`` changes the documentation server port;
+``SERVER_PORT`` changes the development receiver port. The manual sender and
+integration test always use port 9000; for the exporter, match a changed
+receiver port with ``ARGS="--server-url ws://127.0.0.1:9001"``.
+
+``make clean`` does not delete the environment or stop running servers.
+Use ``make clean-venv`` to delete the environment and its installed packages
+(default ``.venv37``, or the ``VENV`` override). Stop processes using it and
+run ``deactivate`` if active first. Recreate it with ``make install``, using
+the ``PYTHON`` override above if needed. Source files and built docs are retained.
+The target refuses symlinks and directories without ``pyvenv.cfg``.
+
 One Python environment
 ----------------------
 

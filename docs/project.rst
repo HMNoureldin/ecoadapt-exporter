@@ -49,6 +49,8 @@ Configuration and documentation
      - Includes runtime requirements and pins pytest.
    * - ``requirements-docs.txt``
      - Sphinx 5.3.0 and Read the Docs theme 1.3.0 for Python 3.7.
+   * - ``Makefile``
+     - Setup, tests, application, development servers, documentation, and cleanup shortcuts.
    * - ``pytest.ini``
      - Test discovery and source import-path configuration.
    * - ``.gitignore``
