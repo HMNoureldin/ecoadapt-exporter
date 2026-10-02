@@ -37,8 +37,10 @@ makes shared helpers importable as ``tests.fakes``.
 
 The unit sender tests do not connect to a WebSocket server. Test doubles isolate
 orchestration from network I/O; a fake sender invokes readiness synchronously.
-Physical hardware, transport failures, reconnection, and complete decoder edge
-cases are not covered by this suite.
+Transport tests use mocks to check immediate connection success, recovery on
+later attempts, and failure after three attempts, including retry delays.
+Physical hardware, reconnection after dropped connections, and complete decoder
+edge cases are not covered by this suite.
 
 Integration smoke test
 ----------------------

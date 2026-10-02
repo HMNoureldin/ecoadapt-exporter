@@ -5,6 +5,7 @@
 import argparse
 import json
 import logging
+import sys
 from typing import Optional
 
 from twisted.internet import reactor
@@ -140,7 +141,7 @@ def parse_settings(argv=None):
 
 
 def main():
-    """Load settings, configure logging, and start the exporter and reactor."""
+    """Run the application, returning 1 on a startup connection failure."""
     args = parse_settings()
     logger = configure_logging(args.log_level)
 
@@ -158,15 +159,23 @@ def main():
         """
         exporter.stop()
 
-    reactor.addSystemEventTrigger(
+    shutdown_trigger = reactor.addSystemEventTrigger(
         "before",
         "shutdown",
         shutdown,
     )
 
-    exporter.start()
+    try:
+        exporter.start()
+    except ConnectionError as error:
+        logger.error("Exporter startup failed: %s. Shutting down.", error)
+        reactor.removeSystemEventTrigger(shutdown_trigger)
+        shutdown()
+        return 1
+
     reactor.run()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -449,8 +449,13 @@ change without modifying the application code.
 The application separates Modbus and WebSocket communication from
 measurement orchestration.
 
-The transport raises an error when a Modbus connection cannot be
-established or a register read fails.
+The transport tries the Modbus connection three times, waiting five seconds
+between failed attempts. It raises an error after the third failure or when
+a register read fails.
+
+If the startup connection fails, the command-line application logs the error,
+closes exporter resources, and exits with status 1 without a traceback.
+Unexpected errors still propagate for debugging.
 
 The WebSocket sender raises an error if an attempt is made to send while
 the WebSocket is not connected.

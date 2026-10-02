@@ -108,9 +108,11 @@ and source line number, for example::
    2026-10-01 14:30:00,123 INFO ecoadapt_exporter exporter.py:90 Starting exporter (interval=10.0 seconds)
 
 DEBUG includes register reads, decoded values, export cycles, and queued JSON;
-INFO covers lifecycle events; WARNING reports unclean WebSocket closure; ERROR
+INFO covers lifecycle events; WARNING reports connection retries and unclean
+WebSocket closure; ERROR
 reports transport and disconnected-send failures. Export-cycle errors propagate
-without a custom failure handler; no retries are implemented. Log
+without a custom failure handler. Modbus connection setup retries up to three
+attempts, with five seconds between failures; export cycles are not retried. Log
 configuration affects this application's logger hierarchy, not all third-party
 libraries or Python warnings. Repeated configuration avoids duplicate handlers.
 

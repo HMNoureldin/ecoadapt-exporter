@@ -1,6 +1,7 @@
 """Synchronous register acquisition through a replaceable transport interface."""
 
 import logging
+import time
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
@@ -49,6 +50,8 @@ class ModbusTcpTransport(Transport):
 
     DEFAULT_PORT = 502
     DEFAULT_UNIT_ID = 1
+    CONNECT_ATTEMPTS = 3
+    CONNECT_RETRY_DELAY = 5
 
     def __init__(
         self,
@@ -68,21 +71,34 @@ class ModbusTcpTransport(Transport):
         )
 
     def connect(self) -> None:
-        """Open the underlying TCP connection.
+        """Try opening the TCP connection three times, five seconds apart.
 
         :raises ConnectionError: If the PyModbus client cannot connect.
         """
-        self.logger.info("Connecting to Modbus device %s:%s (unit %s)", self.host, self.port, self.unit_id)
-        connected = self._client.connect()
-
-        if not connected:
-            self.logger.error("Modbus connection failed: %s:%s", self.host, self.port)
-            raise ConnectionError(
-                "Could not connect to Eco-Adapt device at {}:{}".format(
-                    self.host,
-                    self.port,
-                )
+        for attempt in range(1, self.CONNECT_ATTEMPTS + 1):
+            self.logger.info(
+                "Connecting to Modbus device %s:%s (unit %s, attempt %s/%s)",
+                self.host, self.port, self.unit_id, attempt, self.CONNECT_ATTEMPTS,
             )
+            if self._client.connect():
+                return
+
+            if attempt < self.CONNECT_ATTEMPTS:
+                self.logger.warning(
+                    "Modbus connection failed: %s:%s; retrying in %s seconds",
+                    self.host, self.port, self.CONNECT_RETRY_DELAY,
+                )
+                time.sleep(self.CONNECT_RETRY_DELAY)
+
+        self.logger.error(
+            "Modbus connection failed: %s:%s after %s attempts",
+            self.host, self.port, self.CONNECT_ATTEMPTS,
+        )
+        raise ConnectionError(
+            "Could not connect to Eco-Adapt device at {}:{} after {} attempts".format(
+                self.host, self.port, self.CONNECT_ATTEMPTS,
+            )
+        )
 
     def close(self) -> None:
         """Close the underlying PyModbus client.

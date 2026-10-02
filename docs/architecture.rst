@@ -131,9 +131,10 @@ caller's register list. Format and size tables are independent of device access.
 Failure behavior
 ----------------
 
-A failed connection raises ``ConnectionError``; an error Modbus response raises
+Modbus connection setup makes up to three attempts with five-second delays
+between failures, then raises ``ConnectionError``. An error Modbus response raises
 ``IOError``. Invalid register values or addressing raise ``ValueError``. Sending
-without an open WebSocket raises ``RuntimeError``. These exceptions are not
+without an open WebSocket raises ``RuntimeError``. Read, decoding, and send exceptions are not
 converted into retries. A failed read/send interrupts that cycle; previous
 messages may already have been sent. A failing ``LoopingCall`` stops; the
 exporter does not attach a failure handler or retry the cycle.
